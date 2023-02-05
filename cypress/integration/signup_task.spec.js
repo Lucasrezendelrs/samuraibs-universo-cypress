@@ -81,7 +81,7 @@ describe('cadastro', function () {
       signupPage.alertHaveText('Pelo menos 6 caracteres')
     })
   })
-  context.only('quando não preencho nenhum dos campos', function () {
+  context('quando não preencho nenhum dos campos', function () {
     const alertMessages = [
       'Nome é obrigatório',
       'E-mail é obrigatório',
