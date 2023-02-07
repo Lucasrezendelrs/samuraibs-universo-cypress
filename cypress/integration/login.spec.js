@@ -45,4 +45,42 @@ describe('login', function () {
       loginPage.toast.shouldHaveText(message)
     })
   })
+  context('quando o formato do email é inválido', function () {
+    const emails = [
+      'papito.com.br',
+      'yahoo.com',
+      '@gmail.com',
+      '@',
+      'papito@',
+      '111',
+      '&*^&^&*',
+      'xpto123',
+    ]
+
+    before(function () {
+      loginPage.go()
+    })
+
+    emails.forEach(function (email) {
+      it('não deve logar com o email: ' + email, function () {
+        const user = { email: email, password: 'pwd123' }
+
+        loginPage.form(user)
+        loginPage.submit()
+        loginPage.alertHaveText('Informe um email válido')
+      })
+    })
+  })
+  context.only('quando não preencho nenhum dos campos', function () {
+    const alertMessages = ['E-mail é obrigatório', 'Senha é obrigatória']
+    before(function () {
+      loginPage.go()
+      loginPage.submit()
+    })
+    alertMessages.forEach(function (alert) {
+      it('deve exibir ' + alert.toLowerCase(), function () {
+        loginPage.alertHaveText(alert)
+      })
+    })
+  })
 })
