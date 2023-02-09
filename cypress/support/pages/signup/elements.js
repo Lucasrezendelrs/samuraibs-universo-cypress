@@ -2,5 +2,5 @@ exports.el = {
   name: 'input[placeholder^="Nome"]',
   email: 'input[placeholder$="email"]',
   password: 'input[placeholder*="senha"]',
-  signupButton: ('button', 'Cadastrar'),
+  signupButton: ('button[type=submit]', 'Cadastrar'),
 }
