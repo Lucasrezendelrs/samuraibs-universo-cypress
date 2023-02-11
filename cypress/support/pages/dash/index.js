@@ -8,19 +8,19 @@ class DashPage {
   }
 
   calendarShouldBeVisible() {
-    cy.get('.DayPicker', { timeout: 7000 }).should('be.visible')
+    cy.get(el.calendar, { timeout: 7000 }).should('be.visible')
   }
 
   selectDay(day) {
     const target = new RegExp('^' + day + '$', 'g')
-    cy.contains('.DayPicker-Day--available', day).click({ force: true })
+    cy.contains(el.boxday, target).click({ force: true })
   }
 
   appointmentShoulBe(customer, hour) {
     cy.contains('div', customer.name)
       .should('be.visible')
       .parent()
-      .contains('span[class="appointment"]', hour)
+      .contains(el.boxHour, hour)
       .should('be.visible')
   }
 }
