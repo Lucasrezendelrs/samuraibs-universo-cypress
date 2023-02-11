@@ -27,6 +27,16 @@ import moment from 'moment'
 
 import { apiServer } from '../../cypress.json'
 
+import loginPage from './pages/login'
+import dashPage from './pages/dash'
+
+Cypress.Commands.add('uiLogin', function (user) {
+  loginPage.go()
+  loginPage.form(user)
+  loginPage.submit()
+  dashPage.header.userLoggedIn(user.name)
+})
+
 Cypress.Commands.add('postUser', function (user) {
   cy.task('removeUser', user.email).then(function (result) {
     console.log(result)
@@ -56,14 +66,12 @@ Cypress.Commands.add('createAppointment', function (hour) {
   // Intalar a biblioteca moment no pasta do cypress - yarn add moment -D
   // Esta biblioteca ajuda a formatar a data
   let now = new Date()
-  now.setDate(now.getDate() + 1)
-
   while (now.getDay() === 0 || now.getDay() === 6) {
     now.setDate(now.getDate() + 1)
   }
   Cypress.env('appointmentDay', now.getDate())
 
-  const date = moment(now).format('YYYY-MM-DD ' + hour + ':00')
+  const date = moment(now).format(`YYYY-MM-DD ${hour}:00`)
 
   const payload = {
     provider_id: Cypress.env('providerId'),
