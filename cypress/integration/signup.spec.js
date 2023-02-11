@@ -1,33 +1,81 @@
+import signupPage from '../support/pages/signup'
 
+describe('cadastro', function () {
+  before(function () {
+    cy.fixture('signup').then(function (signup) {
+      this.success = signup.success
+      this.email_dup = signup.email_dup
+      this.email_inv = signup.email_inv
+      this.short_password = signup.short_password
+    })
+  })
+  context('quando o usuário é novato', function () {
+    before(function () {
+      cy.task('removeUser', this.success.email).then(function (result) {
+        console.log(result)
+      })
+    })
+    it('Deve cadastrar com sucesso', function () {
+      signupPage.go()
+      signupPage.form(this.success)
+      signupPage.submit()
+      signupPage.toast.shouldHaveText(
+        'Agora você se tornou um(a) Samurai, faça seu login para ver seus agendamentos!'
+      )
+    })
+  })
+  context('quando o email já existe', function () {
+    before(function () {
+      cy.postUser(this.email_dup)
+    })
+    it('não deve cadastrar o usuário', function () {
+      signupPage.go()
+      signupPage.form(this.email_dup)
+      signupPage.submit()
+      signupPage.toast.shouldHaveText('Email já cadastrado para outro usuário.')
+    })
+  })
+  context('quando o email é incorreto', function () {
+    it('deve exibir mensagem de alerta', function () {
+      signupPage.go()
+      signupPage.form(this.email_inv)
+      signupPage.submit()
+      signupPage.alert.haveText('Informe um email válido')
+    })
+  })
+  context('quando a senha é muito curta', function () {
+    const passwords = ['1', '2a', 'ab3', 'abc4', 'ab#c5']
 
-it('Deve cadastrar um novo usuário', function () {
-  const name = 'Lucas Rezende'
-  const email = 'lucasilva17934@gmail.com'
-  const password = 'pwd123'
+    beforeEach(function () {
+      signupPage.go()
+    })
 
-  cy.visit('/signup')
+    passwords.forEach(function (p) {
+      it('não deve cadastrar com a senha: ' + p, function () {
+        this.short_password.password = p
 
-  cy.get('input[placeholder = "Nome"]').type(name)
-  cy.get('input[placeholder = "E-mail"]').type(email)
-  cy.get('input[placeholder = "Senha"]').type(password)
-
-  //Criação de ouvinte para ficar esperando até que uma requisição POST na rota "users" aconteça 
-  //Uma vez que isso aconteça ele deve trocar para 200
-  cy.intercept('POST','/users',{
-    statusCode: 200
-  }).as('postUser')
-
-  cy.contains('button', 'Cadastrar').click()
-
-  //Espera a aplicação invocar a API depois do clique no botão para pegar o status code para enganar a aplicação
-  //Uma vez que a aplicação recebe o status 200, ela vai mostrar toaster de sucesso
-  cy.wait('@postUser')
-
-  cy.get('.toast')
-    .should('be.visible')
-    .find('p')
-    .should(
-      'have.text',
-      'Agora você pode fazer seu login no Samurai Barbershop!'
-    )
+        signupPage.form(this.short_password)
+        signupPage.submit()
+      })
+    })
+    afterEach(function () {
+      signupPage.alert.haveText('Pelo menos 6 caracteres')
+    })
+  })
+  context('quando não preencho nenhum dos campos', function () {
+    const alertMessages = [
+      'Nome é obrigatório',
+      'E-mail é obrigatório',
+      'Senha é obrigatória',
+    ]
+    before(function () {
+      signupPage.go()
+      signupPage.submit()
+    })
+    alertMessages.forEach(function (alert) {
+      it('deve exibir ' + alert.toLowerCase(), function () {
+        signupPage.alert.haveText(alert)
+      })
+    })
+  })
 })
